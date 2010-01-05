@@ -1,4 +1,4 @@
-(ns sob
+(ns org.scode.sob
   (:gen-class))
 
 (defn -main [& args]
