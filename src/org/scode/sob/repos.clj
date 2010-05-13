@@ -60,6 +60,9 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
                                       (< (.lastModified f) (:scan-checkpoint old)))
                                old
                                (make-page f))))]
+    (doall (for [[fname _] old-map
+                 :when (not (contains? file-map fname))]
+             (logging/info (str "dropped removed post " fname))))
     (into #{} (map make-page-cached file-map))))
 
 (defn scan
