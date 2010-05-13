@@ -3,7 +3,8 @@
   (:require [org.scode.sob.markdown :as markdown]
             [clojure.contrib.command-line :as cmdline]
             [clojure.contrib.logging :as logging]
-            [ring.adapter.jetty]))
+            [ring.adapter.jetty])
+  (:use [org.scode.sob.repos :as repos]))
 
 (defn die [msg]
   (logging/fatal msg)
@@ -11,10 +12,11 @@
 
 (defn make-blog-app
   [port base path]
-  (fn [req]
-    {:status 200
-     :headers {"Content-Type" "text/html"}
-     :body "not implemented"}))
+  (let [repos (repos/new path)]
+    (fn [req]
+      {:status 200
+       :headers {"Content-Type" "text/html"}
+       :body (str req)})))
 
 (defn serve-blog
   "Start serving a blog at http://*:port/base."
