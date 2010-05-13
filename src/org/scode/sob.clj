@@ -11,7 +11,7 @@
   (System/exit 1))
 
 (defn make-blog-app
-  [port base path]
+  [base path]
   (let [repos (repos/new path)]
     (fn [req]
       {:status 200
@@ -19,10 +19,8 @@
        :body (str req)})))
 
 (defn serve-blog
-  "Start serving a blog at http://*:port/base."
-  [port base path]
-  (logging/info (str "starting sob on *:" port base ", serving " path))
-  (ring.adapter.jetty/run-jetty (make-blog-app port base path) {:port port}))
+  [port app]
+  (ring.adapter.jetty/run-jetty app {:port port}))
 
 (defn -main [& args]
   (cmdline/with-command-line args
@@ -34,7 +32,8 @@
       (die "only one file system path currently supported"))
     (if (empty? paths)
       (die "must specify the path to a blog"))
-    (serve-blog port base (first paths))))
+    (logging/info (str "starting sob on *:" port base))
+    (serve-blog port (make-blog-app base (first paths)))))
 
 
 
