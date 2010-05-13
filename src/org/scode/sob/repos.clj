@@ -13,7 +13,11 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
  "Make a new repository at the given path. The path need not exist,
   can be empty, or can contain one or more posts.
 
-  The returned repository is intended to be opaque."
+  A repos has at least these keys:
+
+    :path - the path given to this function
+    :pages - arbitrarily ordered list of pages
+ "
  [path]
  ; Perform an immediate scan because it tends to be helpful to see
  ; failures immediately in case there are any; both during development
