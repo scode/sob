@@ -26,7 +26,7 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
         :last-scan 0
         :scan-interval 1
         :scan-checkpoint 0
-        :pages {}}))
+        :pages []}))
 
 (defn- now [] (System/currentTimeMillis))
 
