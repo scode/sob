@@ -16,7 +16,7 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
   A repos has at least these keys:
 
     :path - the path given to this function
-    :pages - arbitrarily ordered list of pages
+    :pages - a set of pages
  "
  [path]
  ; Perform an immediate scan because it tends to be helpful to see
@@ -26,7 +26,7 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
         :last-scan 0
         :scan-interval 1
         :scan-checkpoint 0
-        :pages []}))
+        :pages #{}}))
 
 (defn- now [] (System/currentTimeMillis))
 
