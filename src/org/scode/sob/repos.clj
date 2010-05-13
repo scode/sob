@@ -5,6 +5,7 @@ A blog post repository on disk is simply a directory containing files
 ending in '.post'. This module helps to scan this on-disk structure and responde to changes incrementally."}
   org.scode.sob.repos
   (:require [org.scode.sob.markdown :as markdown]
+            [clojure.contrib.duck-streams :as duck-streams]
             [clojure.contrib.logging :as logging]))
 
 (defn- scan)
@@ -35,11 +36,31 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
   [s]
   (read (java.io.PushbackReader. (java.io.StringReader. s))))
 
+(defn- make-page
+  [f]
+  (logging/info (str "processing new or possibly changed post " f))
+  (let [source (duck-streams/slurp* f)]
+    {:fname (.getName f)
+     :scan-checkpoint (dec (System/currentTimeMillis))
+     :source source
+     }));; todo, process/render
+
 (defn- scan-pages
   "Inspect path for new, removed or updated pages relative to old-pages,
    and return a new pages map."
   [dir old-pages]
-  {});todo
+  (let [now (System/currentTimeMillis)
+        file-map (into {} (for [file (.listFiles dir)
+                                :when (.endsWith (.getName file) ".post")]
+                            [(.getName file) file]))
+        old-map (zipmap (map :fname old-pages) old-pages)
+        make-page-cached (fn [[fname f]]
+                           (let [old (get old-map fname)]
+                             (if (and old
+                                      (< (.lastModified f) (:scan-checkpoint old)))
+                               old
+                               (make-page f))))]
+    (into #{} (map make-page-cached file-map))))
 
 (defn scan
   "Re-scan disk for new/removed/changed data and return an updated repos."
