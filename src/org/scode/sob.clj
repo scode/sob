@@ -19,9 +19,10 @@
      (dosync
       (alter repos repos/scan))
      (catch Throwable e
-       (let [trace (java.io.StringWriter.)]
-         (.printStackTrace e trace)
-         (logging/error "repository rescan failed:\n" trace))))
+       (let [trace (java.io.StringWriter.)
+             trace-printer (java.io.PrintWriter. trace)]
+         (.printStackTrace e trace-printer)
+         (logging/error (str "repository rescan failed:\n" trace)))))
     (recur)))
 
 (defn start-continuous-rescan
