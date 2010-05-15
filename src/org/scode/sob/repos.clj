@@ -36,22 +36,43 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
   [s]
   (read (java.io.PushbackReader. (java.io.StringReader. s))))
 
+(defn- process-page
+  [s]
+  (let [r (java.io.PushbackReader. (java.io.StringReader. s))
+        meta (read r)]
+    (loop [next-char (.read r)]
+      (if (Character/isSpaceChar next-char)
+        (recur (.read r))
+        (do
+          (.unread r next-char))))
+    (let [html (markdown/to-html (duck-streams/slurp* r))]
+      [(:title meta) (:published? meta) (:pub-date meta) html])))
+
 (defn- make-page
   [f]
   (logging/info (str "processing new or possibly changed post " f))
-  (let [source (duck-streams/slurp* f)]
+  (let [source (duck-streams/slurp* f)
+        [title published? pub-date html] (process-page source)]
     {:fname (.getName f)
      :scan-checkpoint (dec (System/currentTimeMillis))
      :source source
-     }));; todo, process/render
+     :title title
+     :published? published?
+     :pub-date pub-date
+     :html html}))
 
 (defn- scan-pages
   "Inspect path for new, removed or updated pages relative to old-pages,
    and return a new pages map."
   [dir old-pages]
+  ; note 1: Avoiding dot files makes sense in general, and
+  ; specifically avoids the .#FNAME symlinks dropped by emacs while
+  ; editing.
   (let [now (System/currentTimeMillis)
         file-map (into {} (for [file (.listFiles dir)
-                                :when (.endsWith (.getName file) ".post")]
+                                :when (and (.endsWith (.getName file) ".post")
+                                           ; see note 1:
+                                           (not (.startsWith (.getName file) ".")))]
                             [(.getName file) file]))
         old-map (zipmap (map :fname old-pages) old-pages)
         make-page-cached (fn [[fname f]]
