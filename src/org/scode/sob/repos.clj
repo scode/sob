@@ -50,6 +50,10 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
       (logging/info (str "picked up: " ret))
       (conj ret html))))
 
+(defn- index
+  [pages]
+  nil)
+
 (defn- make-page
   [f]
   (logging/info (str "processing new or possibly changed post " f))
@@ -99,9 +103,11 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
       (if (> last-modified (:scan-checkpoint repos))
         (do
           (logging/info (str "repos changed: " (:path repos)))
-          (conj repos
-                [:pages (scan-pages dir (:pages repos))]
-                [:scan-checkpoint (dec now)]))
+          (let [new-pages (scan-pages dir (:pages repos))]
+            (conj repos
+                  [:pages new-pages]
+                  [:scan-checkpoint (dec now)]
+                  [:index (index new-pages)])))
         repos))))
 
 (defn maybe-scan
