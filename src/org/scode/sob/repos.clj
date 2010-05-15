@@ -45,8 +45,10 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
         (recur (.read r))
         (do
           (.unread r next-char))))
-    (let [html (markdown/to-html (duck-streams/slurp* r))]
-      [(:title meta) (:published? meta) (:pub-date meta) html])))
+    (let [html (markdown/to-html (duck-streams/slurp* r))
+          ret [(:title meta) (:published? meta) (:pub-date meta)]]
+      (logging/info (str "picked up: " ret))
+      (conj ret html))))
 
 (defn- make-page
   [f]
