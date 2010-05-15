@@ -45,10 +45,9 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
         (recur (.read r))
         (do
           (.unread r next-char))))
-    (let [html (markdown/to-html (duck-streams/slurp* r))
-          ret [(:title meta) (:published? meta) (:pub-date meta)]]
-      (logging/info (str "picked up: " ret))
-      (conj ret html))))
+    (let [html (markdown/to-html (duck-streams/slurp* r))]
+      (logging/info (str "picked up: " meta))
+      [meta html])))
 
 (defn- index
   [pages]
@@ -58,13 +57,11 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
   [f]
   (logging/info (str "processing new or possibly changed post " f))
   (let [source (duck-streams/slurp* f)
-        [title published? pub-date html] (process-page source)]
+        [meta html] (process-page source)]
     {:fname (.getName f)
      :scan-checkpoint (dec (System/currentTimeMillis))
      :source source
-     :title title
-     :published? published?
-     :pub-date pub-date
+     :meta meta
      :html html}))
 
 (defn- scan-pages
