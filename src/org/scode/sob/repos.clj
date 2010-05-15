@@ -44,6 +44,32 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
       (logging/info (str "picked up: " meta))
       [meta html])))
 
+(defn- permify-title
+  "Given a title (a string), produce a title suitable for use in a
+   permalink. Should this be called mnemonicallize? Not quite.
+
+   In anticipation of changing permification rules backwards
+   compatibly, returns a sequence of two things: The primary permified
+   title to be used when producing URL:s, and a possibly empty
+   sequence of alternate permifications."
+  [s]
+  (defn apply-charwise-rule
+    [r s]
+    (let [xformed (.replaceAll (apply str (map r s)) "-{2,}" "-")]
+      (.substring xformed 0 (min 30 (count xformed)))))
+
+  (defn simple-rule [c]
+    (cond
+     (or (= c \ ) (= c \-)) \-
+     (and (>= (int c) (int \a)) (<= (int c) (int \z))) c
+     (and (>= (int c) (int \A)) (<= (int c) (int \Z))) c
+     true (str)))
+
+  (let [rules [simple-rule]
+        [primary & rest] rules]
+    [(apply-charwise-rule primary s)
+     (for [r rest] (apply-charwise-rule r s))]))
+
 (defn- index
   [pages]
   nil)
