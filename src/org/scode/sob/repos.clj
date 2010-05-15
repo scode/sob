@@ -31,11 +31,6 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
 
 (defn- now [] (System/currentTimeMillis))
 
-(defn- read-from-string
-  "Use the clojure reader to read the string, and return the result."
-  [s]
-  (read (java.io.PushbackReader. (java.io.StringReader. s))))
-
 (defn- process-page
   [s]
   (let [r (java.io.PushbackReader. (java.io.StringReader. s))
