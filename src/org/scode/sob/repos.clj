@@ -70,6 +70,18 @@ ending in '.post'. This module helps to scan this on-disk structure and responde
     [(apply-charwise-rule primary s)
      (for [r rest] (apply-charwise-rule r s))]))
 
+(def #^{:private true} date-re #"^(\d{4})-(\d{2})-(\d{2})")
+(defn-
+  parse-date
+  "string -> {:year :month :day}; raise IllegalArgumentException
+   if the date cannot be parsed."
+  [s]
+  (if-let [[_ year month day] (re-find date-re s)]
+    {:year (Integer/parseInt year)
+     :month (Integer/parseInt month)
+     :day (Integer/parseInt day)}
+    (throw (IllegalArgumentException. s))))
+
 (defn- index
   [pages]
   nil)
